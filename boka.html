@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boka - Skånebutikenbokning</title>
+<link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+<header>
+    <div class="logo-rad">
+        <img class="bi-logotyp" src="/img/bi-logotyp.png" alt="Sverigedemokraterna">
+        <div class="delare"></div>
+        <img class="sd-logotyp" src="/img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
+    </div>
+    <nav>
+        <a href="/boka.html" class="aktiv">Boka</a>
+        <a href="/mina-bokningar.html">Mina bokningar</a>
+        <button onclick="loggaUt()">Logga ut</button>
+    </nav>
+</header>
+<main>
+    <div id="meddelande-yta"></div>
+
+    <div class="kort">
+        <h2>Välj vad ni vill boka</h2>
+        <div class="flikar" id="objekt-flikar"></div>
+
+        <div id="bokningsform-yta"></div>
+    </div>
+
+    <div class="info-ruta">
+        <p>För överenskommelse om hämtning/lämning av bokat objekt hör ni av er till SD Skånebutiken, telefonnummer 0760047473. Observera att det alltid är den som bokar som är ansvarig för att hämtning/lämning sker.</p>
+    </div>
+</main>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+let objektLista = [];
+let valtObjektId = null;
+
+async function init() {
+    const status = await kollaInloggning();
+    if (!status.inloggad) { window.location.href = '/index.html'; return; }
+
+    const svar = await api('/api/objekt');
+    objektLista = svar.data;
+    renderFlikar();
+    if (objektLista.length) valjObjekt(objektLista[0].id);
+}
+
+function renderFlikar() {
+    const yta = document.getElementById('objekt-flikar');
+    yta.innerHTML = objektLista.map(o =>
+        `<div class="flik ${o.id === valtObjektId ? 'vald' : ''}" onclick="valjObjekt(${o.id})">${o.namn}</div>`
+    ).join('');
+}
+
+async function valjObjekt(id) {
+    valtObjektId = id;
+    renderFlikar();
+    const objekt = objektLista.find(o => o.id === id);
+    const bokadeSvar = await api(`/api/objekt/${id}/bokade-datum`);
+    const bokade = bokadeSvar.data || [];
+
+    const idagStr = new Date().toISOString().slice(0, 10);
+
+    const bild = bildForObjekt(objekt);
+
+    document.getElementById('bokningsform-yta').innerHTML = `
+        <div class="objekt-header">
+            ${bild ? `<img src="${bild}" class="objekt-bild-stor" alt="${objekt.namn}">` : ''}
+            <div class="objekt-header-text">
+                <h3>${objekt.namn}</h3>
+                <p>Kan bokas i 1 till ${objekt.max_dagar} dagar. Bokning kostar inget men kräver godkännande innan den gäller.</p>
+            </div>
+        </div>
+        <hr class="objekt-delare">
+        <form id="bokning-form">
+            <div class="tva-kolumner">
+                <div>
+                    <label>Från och med</label>
+                    <input type="date" id="start-datum" min="${idagStr}" required>
+                </div>
+                <div>
+                    <label>Till och med</label>
+                    <input type="date" id="slut-datum" min="${idagStr}" required>
+                </div>
+            </div>
+            <label>Meddelande (valfritt)</label>
+            <textarea id="kommentar" rows="2" placeholder="T.ex. syfte med bokningen eller annat vi bör veta"></textarea>
+            <button class="knapp" type="submit">Skicka bokningsförfrågan</button>
+        </form>
+        ${renderBokadeDatum(bokade)}
+    `;
+
+    document.getElementById('bokning-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const svar = await api('/api/bokningar', 'POST', {
+            objekt_id: valtObjektId,
+            start_datum: document.getElementById('start-datum').value,
+            slut_datum: document.getElementById('slut-datum').value,
+            kommentar: document.getElementById('kommentar').value,
+        });
+        if (svar.ok) {
+            visaMeddelande(svar.data.meddelande, 'ok');
+            valjObjekt(valtObjektId);
+        } else {
+            visaMeddelande(svar.data.fel || 'Kunde inte skapa bokningen.', 'fel');
+        }
+    });
+}
+
+function renderBokadeDatum(bokade) {
+    if (!bokade.length) return '<p class="bokad-lista">Inga datum är bokade just nu.</p>';
+    const rader = bokade.map(b =>
+        `<li>${b.start_datum} till ${b.slut_datum} — ${b.status === 'bekraftad' ? 'Bokad' : 'Väntar på godkännande'}</li>`
+    ).join('');
+    return `<div class="bokad-lista"><strong>Redan upptagna datum:</strong><ul>${rader}</ul></div>`;
+}
+
+init();
+</script>
+</body>
+</html>

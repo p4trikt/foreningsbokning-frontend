@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skånebutikenbokning - Logga in</title>
+<link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+<header>
+    <div class="logo-rad">
+        <img class="bi-logotyp" src="/img/bi-logotyp.png" alt="Sverigedemokraterna">
+        <div class="delare"></div>
+        <img class="sd-logotyp" src="/img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
+    </div>
+    <h1 class="sidtitel">Skånebutiken - Bokning</h1>
+</header>
+<main>
+    <div class="flikar">
+        <div class="flik vald" id="flik-login" onclick="visaFlik('login')">Logga in</div>
+        <div class="flik" id="flik-registrera" onclick="visaFlik('registrera')">Skapa profil</div>
+    </div>
+
+    <div id="meddelande-yta"></div>
+
+    <div class="kort" id="login-kort">
+        <h2>Logga in</h2>
+        <form id="login-form">
+            <label>E-postadress</label>
+            <input type="email" id="login-email" required>
+            <label>Lösenord</label>
+            <input type="password" id="login-losenord" required>
+            <button class="knapp" type="submit">Logga in</button>
+        </form>
+    </div>
+
+    <div class="kort" id="registrera-kort" style="display:none;">
+        <h2>Skapa profil</h2>
+        <p>Skapa en profil för er förening för att kunna boka bil, popcornmaskin, elefantdräkt eller Skånebutiken.</p>
+        <form id="registrera-form">
+            <label>Föreningens namn</label>
+            <input type="text" id="reg-namn" required>
+            <div class="tva-kolumner">
+                <div>
+                    <label>Telefonnummer</label>
+                    <input type="tel" id="reg-telefonnr" required>
+                </div>
+                <div>
+                    <label>E-postadress (används som inloggning)</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+            </div>
+            <label>Lösenord (minst 6 tecken)</label>
+            <input type="password" id="reg-losenord" required minlength="6">
+
+            <label style="margin-top:20px;">Kontaktperson(er)</label>
+            <div id="kontaktpersoner-lista"></div>
+            <button type="button" class="knapp knapp-sekundar knapp-liten" onclick="laggTillKontaktperson()">+ Lägg till kontaktperson</button>
+
+            <div><button class="knapp" type="submit">Skapa profil</button></div>
+        </form>
+    </div>
+</main>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+function visaFlik(namn) {
+    document.getElementById('flik-login').classList.toggle('vald', namn === 'login');
+    document.getElementById('flik-registrera').classList.toggle('vald', namn === 'registrera');
+    document.getElementById('login-kort').style.display = namn === 'login' ? 'block' : 'none';
+    document.getElementById('registrera-kort').style.display = namn === 'registrera' ? 'block' : 'none';
+}
+
+function laggTillKontaktperson() {
+    const lista = document.getElementById('kontaktpersoner-lista');
+    const rad = document.createElement('div');
+    rad.className = 'kontaktperson-rad';
+    rad.innerHTML = `
+        <div><input type="text" placeholder="Namn" class="kp-namn" required></div>
+        <div><input type="tel" placeholder="Telefon (valfritt)" class="kp-telefon"></div>
+        <div><input type="email" placeholder="E-post (valfritt)" class="kp-email"></div>
+        <button type="button" class="knapp knapp-fara knapp-liten" onclick="this.parentElement.remove()">Ta bort</button>
+    `;
+    lista.appendChild(rad);
+}
+laggTillKontaktperson();
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const svar = await api('/api/login', 'POST', {
+        email: document.getElementById('login-email').value,
+        losenord: document.getElementById('login-losenord').value,
+    });
+    if (svar.ok) {
+        window.location.href = '/boka.html';
+    } else {
+        visaMeddelande(svar.data.fel || 'Kunde inte logga in.', 'fel');
+    }
+});
+
+document.getElementById('registrera-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const kontaktpersoner = Array.from(document.querySelectorAll('.kontaktperson-rad')).map(rad => ({
+        namn: rad.querySelector('.kp-namn').value.trim(),
+        telefon: rad.querySelector('.kp-telefon').value.trim(),
+        email: rad.querySelector('.kp-email').value.trim(),
+    })).filter(kp => kp.namn);
+
+    const svar = await api('/api/registrera', 'POST', {
+        namn: document.getElementById('reg-namn').value,
+        telefonnr: document.getElementById('reg-telefonnr').value,
+        email: document.getElementById('reg-email').value,
+        losenord: document.getElementById('reg-losenord').value,
+        kontaktpersoner,
+    });
+    if (svar.ok) {
+        visaMeddelande('Profil skapad! Du kan nu logga in.', 'ok');
+        visaFlik('login');
+        document.getElementById('registrera-form').reset();
+    } else {
+        visaMeddelande(svar.data.fel || 'Kunde inte skapa profil.', 'fel');
+    }
+});
+
+// Om redan inloggad, gå direkt till bokningssidan
+kollaInloggning().then(status => {
+    if (status.inloggad) window.location.href = '/boka.html';
+});
+</script>
+</body>
+</html>

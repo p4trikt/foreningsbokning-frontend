@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adminpanel - Skånebutikenbokning</title>
+<link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+<header>
+    <h1>Adminpanel - Skånebutikenbokning</h1>
+    <nav id="admin-nav" style="display:none;">
+        <button onclick="loggaUtAdmin()">Logga ut</button>
+    </nav>
+</header>
+<main>
+    <div id="meddelande-yta"></div>
+
+    <div class="kort" id="login-kort">
+        <h2>Logga in som administratör</h2>
+        <form id="login-form">
+            <label>E-postadress</label>
+            <input type="email" id="login-email" required>
+            <label>Lösenord</label>
+            <input type="password" id="login-losenord" required>
+            <button class="knapp" type="submit">Logga in</button>
+        </form>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+        <div class="flikar">
+            <div class="flik vald" id="flik-bokningar" onclick="visaFlik('bokningar')">Bokningar</div>
+            <div class="flik" id="flik-oversikt" onclick="visaFlik('oversikt')">Översikt</div>
+            <div class="flik" id="flik-objekt" onclick="visaFlik('objekt')">Objekt</div>
+            <div class="flik" id="flik-foreningar" onclick="visaFlik('foreningar')">Föreningar</div>
+        </div>
+
+        <div class="kort" id="yta-bokningar"></div>
+        <div class="kort" id="yta-oversikt" style="display:none;"></div>
+        <div class="kort" id="yta-objekt" style="display:none;"></div>
+        <div class="kort" id="yta-foreningar" style="display:none;"></div>
+    </div>
+</main>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/admin/js/admin.js"></script>
+</body>
+</html>
