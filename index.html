@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skånebutikenbokning - Logga in</title>
-<link rel="stylesheet" href="/css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
 <header>
     <div class="logo-rad">
-        <img class="bi-logotyp" src="/img/bi-logotyp.png" alt="Sverigedemokraterna">
+        <img class="bi-logotyp" src="img/bi-logotyp.png" alt="Sverigedemokraterna">
         <div class="delare"></div>
-        <img class="sd-logotyp" src="/img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
+        <img class="sd-logotyp" src="img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
     </div>
     <h1 class="sidtitel">Skånebutiken - Bokning</h1>
 </header>
@@ -61,8 +61,8 @@
         </form>
     </div>
 </main>
-<script src="/js/config.js"></script>
-<script src="/js/app.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
 <script>
 function visaFlik(namn) {
     document.getElementById('flik-login').classList.toggle('vald', namn === 'login');
@@ -92,7 +92,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         losenord: document.getElementById('login-losenord').value,
     });
     if (svar.ok) {
-        window.location.href = '/boka.html';
+        window.location.href = SITE_BASE + 'boka.html';
     } else {
         visaMeddelande(svar.data.fel || 'Kunde inte logga in.', 'fel');
     }
@@ -124,7 +124,7 @@ document.getElementById('registrera-form').addEventListener('submit', async (e) 
 
 // Om redan inloggad, gå direkt till bokningssidan
 kollaInloggning().then(status => {
-    if (status.inloggad) window.location.href = '/boka.html';
+    if (status.inloggad) window.location.href = SITE_BASE + 'boka.html';
 });
 </script>
 </body>

@@ -4,22 +4,36 @@
 // Sätts i config.js, som laddas före denna fil.
 const API_BASE_URL = (window.FORENINGSBOKNING_CONFIG && window.FORENINGSBOKNING_CONFIG.API_BASE_URL) || '';
 
+// Webbplatsens rotadress, uträknad från var den här filen själv laddades
+// ifrån. Gör att länkar/bilder fungerar både på webbplatsens rot (Netlify)
+// och i en undermapp (t.ex. GitHub Pages: dittnamn.github.io/repo-namn/),
+// samt oavsett om sidan som laddar filen ligger i rotmappen eller i admin/.
+const SITE_BASE = (function () {
+    const scripts = document.getElementsByTagName('script');
+    for (let i = 0; i < scripts.length; i++) {
+        const src = scripts[i].src || '';
+        const idx = src.indexOf('js/app.js');
+        if (idx !== -1) return src.slice(0, idx);
+    }
+    return '/';
+})();
+
 // Bild baserad på objektets typ (används om inget namn matchar nedan)
 const OBJEKT_BILD = {
-    bil: '/img/objekt/bil.jpg',
-    slap: '/img/objekt/slap.jpg',
-    popcornmaskin: '/img/objekt/popcornmaskin.jpg',
-    elefantdrakt: '/img/objekt/elefantdrakt.jpg',
-    skanebutiken: '/img/objekt/skanebutiken.jpg',
+    bil: SITE_BASE + 'img/objekt/bil.jpg',
+    slap: SITE_BASE + 'img/objekt/slap.jpg',
+    popcornmaskin: SITE_BASE + 'img/objekt/popcornmaskin.jpg',
+    elefantdrakt: SITE_BASE + 'img/objekt/elefantdrakt.jpg',
+    skanebutiken: SITE_BASE + 'img/objekt/skanebutiken.jpg',
 };
 
 // Bild baserad på ord i objektets namn (prioriteras före typen ovan),
 // t.ex. för att skilja på flera bilar med olika utseende
 const OBJEKT_BILD_NAMN = [
-    { match: 'rosa', bild: '/img/objekt/rosa-volvo.jpg' },
-    { match: 'gul', bild: '/img/objekt/gul-volvo.jpg' },
-    { match: 'slap', bild: '/img/objekt/slap.jpg' },
-    { match: 'släp', bild: '/img/objekt/slap.jpg' },
+    { match: 'rosa', bild: SITE_BASE + 'img/objekt/rosa-volvo.jpg' },
+    { match: 'gul', bild: SITE_BASE + 'img/objekt/gul-volvo.jpg' },
+    { match: 'slap', bild: SITE_BASE + 'img/objekt/slap.jpg' },
+    { match: 'släp', bild: SITE_BASE + 'img/objekt/slap.jpg' },
 ];
 
 function bildForObjekt(objekt) {
@@ -62,7 +76,7 @@ async function kollaInloggning() {
 
 async function loggaUt() {
     await api('/api/logout', 'POST');
-    window.location.href = '/index.html';
+    window.location.href = SITE_BASE + 'index.html';
 }
 
 function statusText(status) {

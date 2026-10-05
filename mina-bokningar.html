@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mina bokningar - Skånebutikenbokning</title>
-<link rel="stylesheet" href="/css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
 <header>
     <div class="logo-rad">
-        <img class="bi-logotyp" src="/img/bi-logotyp.png" alt="Sverigedemokraterna">
+        <img class="bi-logotyp" src="img/bi-logotyp.png" alt="Sverigedemokraterna">
         <div class="delare"></div>
-        <img class="sd-logotyp" src="/img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
+        <img class="sd-logotyp" src="img/sd-logotyp-vit.png" alt="Sverigedemokraterna">
     </div>
     <nav>
-        <a href="/boka.html">Boka</a>
-        <a href="/mina-bokningar.html" class="aktiv">Mina bokningar</a>
+        <a href="boka.html">Boka</a>
+        <a href="mina-bokningar.html" class="aktiv">Mina bokningar</a>
         <button onclick="loggaUt()">Logga ut</button>
     </nav>
 </header>
@@ -32,12 +32,12 @@
         <p id="tom-meddelande" style="display:none;">Ni har inga bokningar ännu.</p>
     </div>
 </main>
-<script src="/js/config.js"></script>
-<script src="/js/app.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
 <script>
 async function init() {
     const status = await kollaInloggning();
-    if (!status.inloggad) { window.location.href = '/index.html'; return; }
+    if (!status.inloggad) { window.location.href = SITE_BASE + 'index.html'; return; }
     await laddaBokningar();
 }
 
