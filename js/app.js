@@ -49,16 +49,29 @@ function bildForObjekt(objekt) {
     return OBJEKT_BILD[objekt.typ] || OBJEKT_BILD[typLower] || null;
 }
 
+// Inloggningstoken sparas i webbläsaren. Behövs eftersom Safari/iPhone blockerar
+// kakor mellan olika domäner (frontend och API ligger på olika adresser).
+function hamtaToken() {
+    try { return localStorage.getItem('bokning_token'); } catch (e) { return null; }
+}
+function sparaToken(token) {
+    try {
+        if (token) localStorage.setItem('bokning_token', token);
+        else localStorage.removeItem('bokning_token');
+    } catch (e) { /* lagring blockerad */ }
+}
+
 async function api(url, method = 'GET', body = null) {
-    const opts = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-    };
+    const headers = { 'Content-Type': 'application/json' };
+    const token = hamtaToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const opts = { method, headers, credentials: 'include' };
     if (body !== null) opts.body = JSON.stringify(body);
     const res = await fetch(API_BASE_URL + url, opts);
     let data = {};
     try { data = await res.json(); } catch (e) { /* tomt svar */ }
+    if (url === '/api/login' && res.ok && data.token) sparaToken(data.token);
+    if (url === '/api/logout') sparaToken(null);
     return { ok: res.ok, status: res.status, data };
 }
 
