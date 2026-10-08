@@ -52,12 +52,17 @@ function bildForObjekt(objekt) {
 // Inloggningstoken sparas i webbläsaren. Behövs eftersom Safari/iPhone blockerar
 // kakor mellan olika domäner (frontend och API ligger på olika adresser).
 function hamtaToken() {
-    try { return localStorage.getItem('bokning_token'); } catch (e) { return null; }
+    try { const t = localStorage.getItem('bokning_token'); if (t) return t; } catch (e) { /* blockerad */ }
+    try { return sessionStorage.getItem('bokning_token'); } catch (e) { return null; }
 }
 function sparaToken(token) {
     try {
         if (token) localStorage.setItem('bokning_token', token);
         else localStorage.removeItem('bokning_token');
+    } catch (e) { /* lagring blockerad */ }
+    try {
+        if (token) sessionStorage.setItem('bokning_token', token);
+        else sessionStorage.removeItem('bokning_token');
     } catch (e) { /* lagring blockerad */ }
 }
 
